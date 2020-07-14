@@ -23,7 +23,9 @@ Data Set Merging:
 Run Models:
 1. Quartet Tree Classification Data
     a) Deep Learning Models:
+    
         i) phylo_ResNet.py -- ResNet
+        
         ii) phylo_ConvNet.py -- ConvNet
         iii) inception_net.py -- Inception Network
     b) Maximum Likelihood
