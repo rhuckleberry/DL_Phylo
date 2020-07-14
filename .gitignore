@@ -1,5 +1,3 @@
-Seq-gen/data/dev/
-Seq-gen/data/train/
 Seq-gen/__pycache__
 ML_data_test/__pycache__
 Evolution_Model_Classification/Inception Network.jpg
