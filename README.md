@@ -4,6 +4,7 @@ Deep Learning for Phylogenetic Inference
 Set-Up:
 1. Add the directory Evolution_Model_Classification/ResNet_data
 2. Add the directories:
+
     a)  Seq-gen/data/train
     b) Seq-gen/data/dev
     c) Seq-gen/data/test
@@ -13,16 +14,20 @@ Data Generation:
 1. Quartet Tree Classification Data: choose one of the following
 
     a) Seq-gen/dendropy_data_generator.py -- for pure kingman structured data
+    
     b) Seq-gen/data_generator.py -- for other, not pure kingman structued data (uniform distribution of structures)
+    
 2. Evolution Model Classification Data
     a) Evolution_Model_Classification/model_data_generator.py
     
 Data Set Merging:
+
 ~Use this to merge datasets that you have already generated to save time
 1. Evolution_Model_Classification/dataset_merge.py
     
 Run Models:
 1. Quartet Tree Classification Data
+
     a) Deep Learning Models:
     
         i) phylo_ResNet.py -- ResNet
