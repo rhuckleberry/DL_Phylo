@@ -5,9 +5,9 @@ import numpy as np
 import dendropy
 import treeClassifier
 
-data_size = {"train" : 54000, #divisible by 15 = 3 tree_types * 5 tree_structures
-             "dev" : 3000,
-             "test" : 0}
+data_size = {"train" : 1, #divisible by 15 = 3 tree_types * 5 tree_structures
+             "dev" : 1,
+             "test" : 1}
 hot_encoding = {"A":[1, 0, 0, 0],
                 "C":[0, 1, 0, 0],
                 "T": [0, 0, 1, 0],
