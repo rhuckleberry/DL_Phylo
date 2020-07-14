@@ -6,7 +6,9 @@ Set-Up:
 2. Add the directories:
 
     a)  Seq-gen/data/train
+    
     b) Seq-gen/data/dev
+    
     c) Seq-gen/data/test
     
 Data Generation: 
@@ -18,6 +20,7 @@ Data Generation:
     b) Seq-gen/data_generator.py -- for other, not pure kingman structued data (uniform distribution of structures)
     
 2. Evolution Model Classification Data
+
     a) Evolution_Model_Classification/model_data_generator.py
     
 Data Set Merging:
