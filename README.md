@@ -12,7 +12,9 @@ Set-Up:
     c) Seq-gen/data/test
     
 Data Generation: 
+
 ~Change the parameters at the top of the script to generate the data you wish to specify
+
 1. Quartet Tree Classification Data: choose one of the following
 
     a) Seq-gen/dendropy_data_generator.py -- for pure kingman structured data
