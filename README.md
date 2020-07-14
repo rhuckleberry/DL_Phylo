@@ -40,7 +40,7 @@ Run Models:
         iii) inception_net.py -- Inception Network
     b) Maximum Likelihood
     
-        i) ML_data_test/ML_test.py
+        i) ML_data_test/ML_test.py-- Maximum Likelihood (ML)
         
     c) Evolution Model Classification Data
     
