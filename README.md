@@ -33,6 +33,7 @@ Run Models:
         ii) Evolution_Model_Classification/evomodel_ResNet.py -- ResNet
         
 *Files/functions about "permuting" or "transforming" can be largely ignored. They are vestiges of our old data generation/augementation. I leave the scripts here for now in case they later prove useful
+
 *treeClassifer.py and treeCompare.py are practically the same scripts, but treeClassifier.py is the updated version of treeCompare.py and can effectively replace it
 
     
