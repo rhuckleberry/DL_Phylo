@@ -24,7 +24,7 @@ import torch.nn
 import torch.optim
 import torch.utils.data
 
-NUM_MODELS = 6 #number of models to classify
+NUM_MODELS = 8 #number of models to classify
 
 n = 4 #number of nucleotides (amount needed for hot encoding)
 s = 4 #number of sequences
@@ -148,9 +148,33 @@ class _ResidueModule(torch.nn.Module):
     def forward(self, x):
         return x + self.layers(x)
 
+def loss_function(outputs, labels, base_weight=100):
+    """
+    Evolution Model Loss Function - cross entropy + MSE
+    """
 
-training_data = np.load("ResNet_data/whole_model_train.npy", allow_pickle = True)
-dev_data = np.load("ResNet_data/whole_model_dev.npy", allow_pickle = True)
+    cross_entropy = torch.nn.CrossEntropyLoss(reduction='sum')
+
+    loss = 0
+    for index, output in enumerate(outputs):
+
+        #cross entropy index
+        p1 = torch.tensor([list(output[:2])])
+        y1 = torch.tensor([int(labels[index][0])])
+        loss += cross_entropy(p1, y1) #* base_weight
+        print("base_freq: ", loss)
+
+        #MSE index
+        p2 = output[2:]
+        y2 = labels[index][1:]
+        loss += torch.dot(p2-y2, p2-y2)
+        print("rate_mx: ", torch.dot(p2-y2, p2-y2))
+
+    return loss
+
+
+training_data = np.load("ResNet_data/test_model_train.npy", allow_pickle = True)
+dev_data = np.load("ResNet_data/test_model_dev.npy", allow_pickle = True)
 
 train_data = training_data.tolist()
 validation_data = dev_data.tolist()
@@ -165,7 +189,7 @@ vis = visdom.Visdom()
 model = _Model()
 optimizer = torch.optim.Adam(model.parameters(), lr=0.001, weight_decay=1e-5)
 #weight initialization...
-loss_function = torch.nn.CrossEntropyLoss(reduction='sum')
+# loss_function = torch.nn.CrossEntropyLoss(reduction='sum')
 
 BATCH_SIZE = 16
 TRAIN_SIZE = len(train_data) // 5
@@ -206,38 +230,42 @@ while epoch < 300:
         optimizer.step()
 
         score += float(loss)
-        _, predicted = torch.max(output.data, 1)
-        correct += (predicted == y).sum().item()
+        # _, predicted = torch.max(output.data, 1)
+        # correct += (predicted == y).sum().item()
 
-        print("\n")
-        #print(output)
-        print(predicted)
-        print(y)
-        print("\n")
+        # print("\n")
+        # print("output: ", output)
+        # # print(predicted)
+        # print("label: ", y)
+        # print("total: ", sample_count)
+        # print("\n")
 
     score /= sample_count
-    accuracy = correct / sample_count
-    print("\n", "\n")
-    print(f'Epoch{epoch}')
-    print("\n")
-    print("Training:")
-    print(f'Training loss: {score}')
-    print(f'Accuracy: {accuracy}')
+    # accuracy = correct / sample_count
+    # print("\n", "\n")
+    # print(f'Epoch{epoch}')
+    # print("\n")
+    # print("Training:")
+    # print(f'Training loss: {score}')
+    # # print(f'Accuracy: {accuracy}')
 
-    vis.line(
-        X = [epoch],
-        Y = [accuracy],
-        opts= dict(title="Inception resnet Model Classifier-Combine Arch- whole more param",
-               xlabel="Epochs",
-               showlegend=True),
-        win= "mod_test7",
-        name = "Train Accuracy",
-        update="append"
-        )
+    # vis.line(
+    #     X = [epoch],
+    #     Y = [accuracy],
+    #     opts= dict(title="Inception resnet Model Classifier-Combine Arch- whole more param",
+    #            xlabel="Epochs",
+    #            showlegend=True),
+    #     win= "mod_test11",
+    #     name = "Train Accuracy",
+    #     update="append"
+    #     )
     vis.line(
         X = [epoch],
         Y = [score],
-        win= "mod_test7",
+        opts= dict(title="Inception resnet Model Classifier-new way",
+                   xlabel="Epochs",
+                   showlegend=True),
+        win= "mod_test11",
         name = "Train Score",
         update="append"
         )
@@ -265,8 +293,12 @@ while epoch < 300:
         loss = loss_function(output, y)
 
         score += float(loss)
-        _, predicted = torch.max(output.data, 1)
-        correct += (predicted == y).sum().item()
+        # _, predicted = torch.max(output.data, 1)
+        # correct += (predicted == y).sum().item()
+
+        # print("\n\n", "output: ", output)
+        # print("label: ", y)
+        # print("total: ", sample_count, "\n\n")
 
     #     wrong = [(predicted[i], i) for i in range(len(predicted)) if predicted[i] != y[i]]
     #     tree_0 = [tree for tree, i in wrong if y[i] == 0]
@@ -314,24 +346,24 @@ while epoch < 300:
     # )
 
     score /= sample_count
-    accuracy = correct / sample_count
-    print("\n", "\n")
-    print("Validation:")
-    print(f'Validation loss: {score}')
-    print(f'Accuracy: {accuracy}')
-    print("\n", "\n")
+    # accuracy = correct / sample_count
+    # print("\n", "\n")
+    # print("Validation:")
+    # print(f'Validation loss: {score}')
+    # # print(f'Accuracy: {accuracy}')
+    # print("\n", "\n")
 
-    vis.line(
-        X = [epoch],
-        Y = [accuracy],
-        win= "mod_test7",
-        name = "Dev Accuracy",
-        update="append"
-        )
+    # vis.line(
+    #     X = [epoch],
+    #     Y = [accuracy],
+    #     win= "mod_test11",
+    #     name = "Dev Accuracy",
+    #     update="append"
+    #     )
     vis.line(
         X = [epoch],
         Y = [score],
-        win= "mod_test7",
+        win= "mod_test11",
         name = "Dev Score",
         update="append"
         )

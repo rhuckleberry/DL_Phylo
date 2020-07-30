@@ -20,12 +20,12 @@ hot_encoding = {"A":[1, 0, 0, 0],
                 "T": [0, 0, 1, 0],
                 "G": [0, 0, 0, 1]}
 
-data_amount = {JC : 0,
-               K80 : 0,
-               F81 : 10000,
-               HKY85 : 10000,
-               F84 : 10000,
-               GTR : 10000} #map model to amount of data per model
+data_amount = {JC : 3000,
+               K80 : 3000,
+               F81 : 3000,
+               HKY85 : 3000,
+               F84 : 3000,
+               GTR : 3000} #map model to amount of data per model
 
 sequence_length = 200
 structure_file = "/Users/rhuck/Downloads/DL_Phylo/Seq-gen/tree_types/pure_kingman.tre"
@@ -41,6 +41,9 @@ def generate_data(data_amount, sequence_length, structure_file, sample_amount, i
     structure_f = open(structure_file)
     structure_lines = structure_f.readlines()
 
+    #labels lists
+    labels_map = {} #map of evomodel string (aka path later below) to labels list
+
     #generate data
     for evomodel, data_size in data_amount.items():
         #check data_size is allowed or skip if its 0
@@ -55,14 +58,54 @@ def generate_data(data_amount, sequence_length, structure_file, sample_amount, i
         print("Data Loss: ", data_size % sample_amount)
 
         for _ in range(model_instances):
+            #generate data
             model, base_freq, t_ratio, rate_mx = evomodel()
             path = MODEL_STRING_MAP[evomodel] #string of model name
             intermediate_file = tree_structure_sample(sample_amount, structure_lines, intermediate_file)
             generate_tree(model, base_freq, t_ratio, rate_mx, 1, sequence_length, intermediate_file, path)
+
+            #make labels
+            label = label_data(base_freq, t_ratio, rate_mx)
+            if path in labels_map:
+                labels_map[path].extend([label for _ in range(sample_amount)])
+            else:
+                labels_map[path] = [label for _ in range(sample_amount)]
+
         os.remove(intermediate_file)
 
     #close structure file
     structure_f.close()
+
+    return labels_map
+
+def label_data(base_freq, t_ratio, rate_mx):
+    """
+    Takes in generation data and returns vector of parameters -- label
+    """
+    vector = []
+
+    #base_freqeunces
+    if base_freq == "0.25, 0.25, 0.25, 0.25":
+        #add error bounds like "close enough"??
+        vector.append(1)
+    else:
+        vector.append(0)
+
+    #rate_matrix
+    if rate_mx == None and t_ratio != None:
+        #R = a/2b, a: transition ratio, b: transversion ratio
+        #~we want b = 1 so last index is always 1
+        trans_ratio = 2 * float(t_ratio)
+        rates = [1, trans_ratio, 1, 1, trans_ratio, 1]
+        vector.extend(rates)
+    elif t_ratio == None and rate_mx != None:
+        rates = rate_mx.split(", ")
+        vector.extend([float(i) for i in rates])
+
+    assert len(vector) == 7
+
+    return vector
+
 
 def tree_structure_sample(amount, structure_lines, intermediate_file = "model_data/intermediate.tre"):
     """
@@ -95,14 +138,15 @@ def generate_tree(model, base_freq, t_ratio, rate_mx, amount, sequence_length, s
                   <{structure_file}> model_data/{path}.dat')
 
 #preprocess data
-def preprocess_data(output_path):
+def preprocess_data(output_path, labels):
     all_data = []
     #loop over all files in directory
     directory = "model_data"
     for filename in os.listdir(directory):
         if filename.endswith(".dat"):
-            label = MODEL_MAP[filename[:-4]]
-            file_data = _read_file_data("model_data/" + filename, label)
+            evomodel_string = filename[:-4]
+            model_labels = labels[evomodel_string]
+            file_data = _read_file_data("model_data/" + filename, model_labels)
 
             #hot encode data
             data = []
@@ -121,11 +165,11 @@ def preprocess_data(output_path):
     save_data = np.array(all_data)
     np.save(output_path, save_data)
 
-def _read_file_data(filename, label):
+def _read_file_data(filename, labels):
         """
         Reads data from file in given path
 
-        Returns: file_data - list of tuples (sequences, label)
+        Returns: file_data - list of tuples (sequences, labels)
         """
         try:
             file = open(filename, "r")
@@ -152,7 +196,8 @@ def _read_file_data(filename, label):
                 for i in line:
                     assert i != None
 
-                file_data.append((datapoint, label))
+                datapoint_index = len(file_data)
+                file_data.append((datapoint, labels[datapoint_index]))
 
             else:
                 list_index = int(line[5]) - 1
@@ -187,6 +232,7 @@ def _hot_encode(dna_seq):
     return hot_encode_seq
 
 
-generate_data(data_amount, sequence_length, structure_file, sample_amount)
-output_path = "ResNet_data/final_data"
-preprocess_data(output_path)
+labels = generate_data(data_amount, sequence_length, structure_file, sample_amount)
+# print(labels)
+output_path = "ResNet_data/test"
+preprocess_data(output_path, labels)

@@ -6,11 +6,11 @@ import treeCompare
 import ML_Accuracy
 
 INPUT_PATH = "/Users/rhuck/downloads/DL_Phylo/Seq-gen/data/dev/dev_dendropy.dat"
-IQTREE_PATH = "iqtree-1.6.12-MacOSX/bin/iqtree"
-ML_PATH = "ml_path" #directory name and write write files to
-FINAL_PATH = "ML_output.dat" #file name to final output file
+IQTREE_PATH = "/Users/rhuck/Downloads/DL_Phylo/ML_data_test/iqtree"
+ML_PATH = "ml_tree_path" #directory name and write write files to
+FINAL_PATH = "ML_tree_output.dat" #file name to final output file
 
-labels_path = "DL_Phylo/Seq-gen/data/dev/dev_dendropy_labels.txt"
+labels_path = "/Users/rhuck/Downloads/DL_Phylo/Seq-gen/data/dev/dev_dendropy_labels.txt"
 #path to labels to compare to in ML_accuracy to get accuracy
 
 evomodel = "GTR"
@@ -112,7 +112,7 @@ def run_all_ML_test(input_path, iqtree_path, ml_path, final_path, evomodel):
 #Run program
 run_all_ML_test(INPUT_PATH, IQTREE_PATH, ML_PATH, FINAL_PATH, evomodel)
 
-accuracy, incorrect, total = ML_Accuracy.ML_accuracy(FINAL_PATH, labels_path)
+accuracy, incorrect, total = ML_Accuracy.ML_accuracy(labels_path, FINAL_PATH)
 
 # output_f = open(FINAL_PATH, "r")
 # output = ML_Accuracy.read_labels_file(output_f)

@@ -23,6 +23,11 @@ import torch.nn
 import torch.optim
 import torch.utils.data
 
+graph_title = "ResNet Recombination Model test1_fact5_sl10000"
+graph_win = "test1_fact5_sl10000" #"recomb2"
+data_test = "test1_fact5_sl10000"
+model_number = "0"
+
 
 class _Model(torch.nn.Module):
     """A neural network model to predict phylogenetic trees."""
@@ -91,43 +96,30 @@ class _ResidueModule(torch.nn.Module):
         #print("forward resnet")
         return x + self.layers(x)
 
-def permute_data(datapoint):
 
-    tree_type = datapoint[1]
-    permuted_datapoints = None
-
-    if tree_type == 0: #alpha
-        permuted_datapoints = permute._alpha_permute(datapoint)
-    elif tree_type == 1: #beta
-        permuted_datapoints = permute._beta_permute(datapoint)
-    elif tree_type == 2: #gamma
-        permuted_datapoints = permute._gamma_permute(datapoint)
-    else:
-        print("Error: tree type not defined")
-
-    random.shuffle(permuted_datapoints)
-
-    return permuted_datapoints
-
-training_data = np.load("seq-gen/data/train/training_data.npy", allow_pickle = True)
-dev_data = np.load("seq-gen/data/dev/development_data.npy", allow_pickle = True)
+training_data = np.load(f"test_data/{data_test}_train.npy", allow_pickle = True)
+dev_data = np.load(f"test_data/{data_test}_dev.npy", allow_pickle = True)
 train_data = training_data.tolist()
 validation_data = dev_data.tolist()
-print(len(train_data))
-print(len(validation_data))
-print("loaded data")
+print("Train Set Size: ", len(train_data))
+print("Development Set Size: ", len(validation_data))
 
 #plotting
 vis = visdom.Visdom()
 
 #model Hyperparameters
 model = _Model()
+
+# #Load Model
+# load_path = f"/Users/rhuck/Downloads/DL_Phylo/Recombination/models/{data_test}." + str(epoch)
+# model = torch.load(load_path)
+
 optimizer = torch.optim.Adam(model.parameters(), lr=0.001, weight_decay=1e-5)
 #weight initialization...
 loss_function = torch.nn.CrossEntropyLoss(reduction='sum')
 
 BATCH_SIZE = 16
-TRAIN_SIZE = 3600
+TRAIN_SIZE = 2000#len(train_data)#3600
 epoch = 1
 
 #Train
@@ -135,7 +127,8 @@ while epoch < 300:
 
     #TRAIN
     model.train()
-    #randomly take 2000 datapoints
+
+    #randomly sample TRAIN_SIZE number of datapoints
     epoch_train = random.sample(train_data, TRAIN_SIZE)
     sample_count, correct, score = 0, 0, 0.0
 
@@ -167,40 +160,27 @@ while epoch < 300:
         _, predicted = torch.max(output.data, 1)
         correct += (predicted == y).sum().item()
 
-        print("\n")
-        # print(output.data)
-        # softmax = torch.nn.Softmax(dim=0)
-        # for i in range(len(output.data)):
-        #     entry = output.data[i]
-        #     print("prob vector: ", softmax(entry), y[i])
-            #print(sum(prob))
-        print(predicted)
-        print(y)
-        print("\n")
+        print("\n", predicted, y, "\n")
 
     score /= sample_count
     accuracy = correct / sample_count
-    print("\n", "\n")
-    print(f'Epoch{epoch}')
-    print("\n")
-    print("Training:")
-    print(f'Training loss: {score}')
-    print(f'Accuracy: {accuracy}')
+
+    print("\n\n", "Epoch: \n", epoch, "Train Acc: ", accuracy, "Train Score: ", score)
 
     vis.line(
         X = [epoch],
         Y = [accuracy],
-        opts= dict(title="ResNet Tree Model Test2",
+        opts= dict(title=graph_title,
                xlabel="Epochs",
                showlegend=True),
-        win= "thing2",
+        win= graph_win,
         name = "Train Accuracy",
         update="append"
         )
     vis.line(
         X = [epoch],
         Y = [score],
-        win= "thing2",
+        win= graph_win,
         name = "Train Score",
         update="append"
         )
@@ -229,16 +209,12 @@ while epoch < 300:
         _, predicted = torch.max(output.data, 1)
         correct += (predicted == y).sum().item()
 
+        print("\n", predicted, y, "\n")
+
     #     wrong = [(predicted[i], i) for i in range(len(predicted)) if predicted[i] != y[i]]
     #     tree_0 = [tree for tree, i in wrong if y[i] == 0]
     #     tree_1 = [tree for tree, i in wrong if y[i] == 1]
     #     tree_2 = [tree for tree, i in wrong if y[i] == 2]
-    #     print("\n", "\n")
-    #     print(predicted)
-    #     print(y)
-    #     print("\n")
-    #     print(wrong, len(wrong))
-    #     print("\n", "\n")
     #
     #     tree_0_len += len(tree_0)
     #     tree_1_len += len(tree_1)
@@ -251,17 +227,13 @@ while epoch < 300:
     #     real_0 += len([i for i in y if i == 0])
     #     real_1 += len([i for i in y if i == 1])
     #     real_2 += len([i for i in y if i == 2])
-    #
-    # print("done")
+
 
     score /= sample_count
     accuracy = correct / sample_count
-    print("\n", "\n")
-    print("Validation:")
-    print(f'Validation loss: {score}')
-    print(f'Accuracy: {accuracy}')
-    print("\n", "\n")
-    #
+
+    print("\n", "Val Acc: ", accuracy, "Val Score: ", score)
+
     # vis.bar(
     #     X = [tree_0_len, tree_1_len, tree_2_len, guess_0, guess_1, guess_2,
     #          real_0, real_1, real_2],
@@ -274,16 +246,20 @@ while epoch < 300:
     vis.line(
         X = [epoch],
         Y = [accuracy],
-        win= "thing2",
+        win= graph_win,
         name = "Dev Accuracy",
         update="append"
         )
     vis.line(
         X = [epoch],
         Y = [score],
-        win= "thing2",
+        win= graph_win,
         name = "Dev Score",
         update="append"
         )
+
+    #save MODEL
+    save_path = f"/Users/rhuck/Downloads/DL_Phylo/Recombination/models/{data_test}_{model_number}." + str(epoch)
+    torch.save(model.state_dict(), save_path)
 
     epoch += 1

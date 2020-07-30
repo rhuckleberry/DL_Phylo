@@ -83,6 +83,13 @@ while epoch < 600:
         x_list = []
         y_list = []
 
+        # transformed_data = []
+        # for datapoint in data:
+        #     all_datapoint = permute_data(datapoint)
+        #     transformed_data += all_datapoint
+        #
+        # random.shuffle(transformed_data)
+
         for datapoint in data:
             sequences = datapoint[0]
             label = datapoint[1]
@@ -146,6 +153,65 @@ while epoch < 600:
     tree_0_len, tree_1_len, tree_2_len = 0, 0, 0
     guess_0, guess_1, guess_2 = 0,0,0
     real_0, real_1, real_2 = 0,0,0
+
+    # ##PERMUTE
+    # for data in validation_data:
+    #
+    #     transformed_data = transform(data)
+    #     print(len(transformed_data))
+    #     print([i for _, i in transformed_data])
+    #
+    #     x_list = []
+    #     y_list = []
+    #
+    #     for datapoint in transformed_data:
+    #         sequences = datapoint[0]
+    #         label = datapoint[1]
+    #         x_list.append(sequences)
+    #         y_list.append(label)
+    #
+    #     x = torch.tensor(x_list, dtype=torch.float)
+    #     x = x.view(24, 4, 4, -1)
+    #     y = torch.tensor(y_list)
+    #     sample_count += x.size()[0]
+    #
+    #     output = model(x)
+    #     loss = loss_function(output, y)
+    #
+    #     score += float(loss)
+    #     _, predicted = torch.max(output.data, 1)
+    #     correct += (predicted == y).sum().item()
+
+
+
+
+    # #NO PERMUTE
+    # DEV_BATCH_SIZE = BATCH_SIZE * 24
+    # DEV_SIZE = len(validation_data)
+    #
+    # for i in range(DEV_SIZE // DEV_BATCH_SIZE):
+    #     data = validation_data[i * DEV_BATCH_SIZE : (i+1) * DEV_BATCH_SIZE]
+    #
+    #     x_list = []
+    #     y_list = []
+    #
+    #     for datapoint in data:
+    #         sequences = datapoint[0]
+    #         label = datapoint[1]
+    #         x_list.append(sequences)
+    #         y_list.append(label)
+    #
+    #     x = torch.tensor(x_list, dtype=torch.float)
+    #     x = x.view(DEV_BATCH_SIZE, 4, 4, -1)
+    #     y = torch.tensor(y_list)
+    #     sample_count += x.size()[0]
+    #
+    #     output = model(x)
+    #     loss = loss_function(output, y)
+    #
+    #     score += float(loss)
+    #     _, predicted = torch.max(output.data, 1)
+    #     correct += (predicted == y).sum().item()
 
     #NO PERMUTE -- batch size of 1
     for x, y in validation_data:

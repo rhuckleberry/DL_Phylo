@@ -39,31 +39,22 @@ def transition_transversion_ratio(mu = 1, sigma = 2):
 
     return str(abs(random.gauss(mu, sigma)))
 
-def random_rate_mx(num_rate_mx_parameters):
+def random_rate_mx(num_rate_mx_parameters, mu = 1, sigma = 0.5, min = 0.001):
     """
-    Chooses a random rate parameter to have value 1. Then chooses random other
-    values for the other parameters s.t. the value is less than 1 and
-    greater than 0
+    Chooses final index to have value 1. Then chooses random other
+    values for the other parameters by a gaussian distribution
 
     Input: integer representing the number of hyperparameters to randomly assign
     Output: list of values for those hyperparameter rate matrix values
     """
-    parameters = [-1 for i in range(num_rate_mx_parameters)]
+    parameters = []
+    #choose values for all indexes except the last one
+    for _ in range(num_rate_mx_parameters - 1):
+        rate = max(random.gauss(mu, sigma), min)
+        parameters.append(rate)
 
-    #choose parameter that will have value 1
-    index_array = [i for i in range(num_rate_mx_parameters)]
-    random_index = random.choice(index_array)
-    parameters[random_index] = 1
-    index_array.remove(random_index)
-
-    #choose random other numbers between 0 and 1 for other parameters
-    for index in index_array:
-        random_value = random.random()
-        parameters[index] = random_value
-
-    #check all parameters where changed
-    for index in parameters:
-        assert index != -1
+    parameters.append(1) #1 for final index
+    assert len(parameters) == num_rate_mx_parameters
 
     return parameters
 

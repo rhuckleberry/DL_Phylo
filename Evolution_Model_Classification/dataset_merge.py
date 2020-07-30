@@ -45,22 +45,22 @@ def new_sets(datasets, dev_percentage, output_path):
                   to end of string)
     """
 
-    # #load data
-    # load_data = []
-    # for dataset in datasets:
-    #     data = np.load(dataset, allow_pickle=True)
-    #     load_data.append(data)
-    #
-    # #concatenate data
-    # all_data = np.concatenate(load_data)
-    #
-    # #shuffle data
-    # np.random.shuffle(all_data)
+    #load data
+    load_data = []
+    for dataset in datasets:
+        data = np.load(dataset, allow_pickle=True)
+        load_data.append(data)
 
-    _, all_data, lost_data = standardize_data_types(datasets)
+    #concatenate data
+    all_data = np.concatenate(load_data)
 
     #shuffle data
     np.random.shuffle(all_data)
+
+    # _, all_data, lost_data = standardize_data_types(datasets)
+    #
+    # #shuffle data
+    # np.random.shuffle(all_data)
 
     #divide all_data
     divide_index = int(len(all_data) * dev_percentage)
@@ -75,7 +75,7 @@ def new_sets(datasets, dev_percentage, output_path):
     #save new datasets
     np.save(output_path + "_dev", new_dev)
     np.save(output_path + "_train", new_train)
-    np.save(output_path + "_lost", lost_data)
+    #np.save(output_path + "_lost", lost_data)
 
     return new_dev, new_train
 
@@ -147,16 +147,17 @@ if __name__ == "__main__":
     # dataset_4 = "ResNet_data/JC_F81/F81_dev.npy"
     # dataset_5 = "ResNet_data/K80_train.npy"
     # dataset_6 = "ResNet_data/K80_train.npy"
-    dataset_7 = "ResNet_data/final_data.npy"
-    dataset_8 = "ResNet_data/combined_train.npy"
-    dataset_9 = "ResNet_data/combined_dev.npy"
-    dataset_10 = "ResNet_data/combined_lost.npy"
+    # dataset_7 = "ResNet_data/final_data.npy"
+    # dataset_8 = "ResNet_data/combined_train.npy"
+    # dataset_9 = "ResNet_data/combined_dev.npy"
+    # dataset_10 = "ResNet_data/combined_lost.npy"
     # dataset_11 = "ResNet_data/whole_model_train.npy"
     # dataset_12 = "ResNet_data/whole_model_dev.npy"
-    datasets = [dataset_7, dataset_8, dataset_9, dataset_10]
+    dataset_13 = "ResNet_data/test.npy"
+    datasets = [dataset_13]
 
-    dev_percentage = 0.075
-    output_path = "ResNet_data/whole_model"
+    dev_percentage = 0.3
+    output_path = "ResNet_data/test8"
     _, _ = new_sets(datasets, dev_percentage, output_path)
 
     # _, _, _ = standardize_data_types(datasets)
