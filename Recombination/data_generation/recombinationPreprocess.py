@@ -102,7 +102,7 @@ def _hot_encode(dna_seq):
 
 
 if __name__ == "__main__":
-    data_directory = "/Users/rhuck/Downloads/DL_Phylo/Recombination/HCG_200_1_6"#path to output of main.py
+    data_directory = "/Users/rhuck/Downloads/DL_Phylo/Recombination/data_generation/recombination_data/HCG_200_1_6"#path to output of main.py
     data_path = "recombinant_data.npy"#path to output of preprocessed data
 
     preprocess_data(data_directory, data_path)

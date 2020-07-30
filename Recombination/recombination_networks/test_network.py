@@ -23,11 +23,14 @@ import torch.nn
 import torch.optim
 import torch.utils.data
 
-graph_title = "ResNet Recombination Model test1_fact5_sl10000"
-graph_win = "test1_fact5_sl10000" #"recomb2"
-data_test = "test1_fact5_sl10000"
-model_number = "0"
+graph_title = "Full Test Recombination Model recomb_test2"
+graph_win = "recomb_test2.8" #"recomb2"
+data_test = "recomb_test2"
+model_number = "8"
 
+n = 4 #number of nucleotides (amount needed for hot encoding)
+s = 4 #number of sequences
+c = None #sequence length
 
 class _Model(torch.nn.Module):
     """A neural network model to predict phylogenetic trees."""
@@ -36,27 +39,43 @@ class _Model(torch.nn.Module):
         """Create a neural network model."""
         print("making model")
         super().__init__()
-        self.conv = torch.nn.Sequential(
-            torch.nn.Conv1d(16, 80, 1, groups=4),
-            torch.nn.BatchNorm1d(80),
+
+        k = 32
+        l = 16
+
+        # self.conv = torch.nn.Sequential(
+        #     torch.nn.Conv2d(16, 80, 1, groups=4),
+        #     torch.nn.BatchNorm1d(80),
+        #     torch.nn.ReLU(),
+        #     torch.nn.Conv1d(80, 32, 1),
+        #     torch.nn.BatchNorm1d(32),
+        #     torch.nn.ReLU(),
+        #
+        #     torch.nn.AdaptiveAvgPool1d(1),
+        # )
+
+        self.transition = torch.nn.Sequential(
+            torch.nn.Conv2d(s, k, (1,n)),
+            torch.nn.BatchNorm2d(k),
             torch.nn.ReLU(),
-            torch.nn.Conv1d(80, 32, 1),
-            torch.nn.BatchNorm1d(32),
+
+            _ResidueModule(k),
+            _ResidueModule(k),
+            torch.nn.AvgPool2d(kernel_size=(2,1)),
+            _ResidueModule(k),
+            _ResidueModule(k),
+            torch.nn.AvgPool2d(kernel_size=(2,1)),
+            _ResidueModule(k),
+            _ResidueModule(k),
+            torch.nn.AvgPool2d(kernel_size=(2,1)),
+
+            torch.nn.Conv2d(k, l, (c//8,1)),
+            torch.nn.BatchNorm2d(l),
             torch.nn.ReLU(),
-            _ResidueModule(32),
-            _ResidueModule(32),
-            torch.nn.AvgPool1d(2),
-            _ResidueModule(32),
-            _ResidueModule(32),
-            torch.nn.AvgPool1d(2),
-            _ResidueModule(32),
-            _ResidueModule(32),
-            torch.nn.AvgPool1d(2),
-            _ResidueModule(32),
-            _ResidueModule(32),
-            torch.nn.AdaptiveAvgPool1d(1),
-        )
-        self.classifier = torch.nn.Linear(32, 3)
+            torch.nn.AdaptiveAvgPool2d(1),
+            )
+
+        self.classifier = torch.nn.Linear(l, 3)
 
     def forward(self, x):
         """Predict phylogenetic trees for the given sequences.
@@ -72,37 +91,36 @@ class _Model(torch.nn.Module):
             The predicted adjacency trees.
         """
 
-        #print("forward")
-        x = x.view(x.size()[0], 16, -1)
-        x = self.conv(x).squeeze(dim=2)
-        return self.classifier(x)
+        # x = x.view(x.size()[0], 16, -1)
+        # x = self.conv(x).squeeze(dim=2)
 
+        x = self.transition(x)
+        x = x.view(x.size(0), -1)
+        return self.classifier(x)
 
 class _ResidueModule(torch.nn.Module):
 
     def __init__(self, channel_count):
-        #print("making resnet")
         super().__init__()
         self.layers = torch.nn.Sequential(
-            torch.nn.Conv1d(channel_count, channel_count, 1),
-            torch.nn.BatchNorm1d(channel_count),
+            torch.nn.Conv2d(channel_count, channel_count, (1, 1)),
+            torch.nn.BatchNorm2d(channel_count),
             torch.nn.ReLU(),
-            torch.nn.Conv1d(channel_count, channel_count, 1),
-            torch.nn.BatchNorm1d(channel_count),
+            torch.nn.Conv2d(channel_count, channel_count, (1, 1)),
+            torch.nn.BatchNorm2d(channel_count),
             torch.nn.ReLU(),
         )
 
     def forward(self, x):
-        #print("forward resnet")
         return x + self.layers(x)
 
-
-training_data = np.load(f"test_data/{data_test}_train.npy", allow_pickle = True)
-dev_data = np.load(f"test_data/{data_test}_dev.npy", allow_pickle = True)
+training_data = np.load(f"/Users/rhuck/Downloads/DL_Phylo/Recombination/data_generation/test_data/{data_test}_train.npy", allow_pickle = True)
+dev_data = np.load(f"/Users/rhuck/Downloads/DL_Phylo/Recombination/data_generation/test_data/{data_test}_dev.npy", allow_pickle = True)
 train_data = training_data.tolist()
 validation_data = dev_data.tolist()
 print("Train Set Size: ", len(train_data))
 print("Development Set Size: ", len(validation_data))
+c = len(dev_data[0][0][0])
 
 #plotting
 vis = visdom.Visdom()
@@ -114,12 +132,13 @@ model = _Model()
 # load_path = f"/Users/rhuck/Downloads/DL_Phylo/Recombination/models/{data_test}." + str(epoch)
 # model = torch.load(load_path)
 
+
+
 optimizer = torch.optim.Adam(model.parameters(), lr=0.001, weight_decay=1e-5)
-#weight initialization...
 loss_function = torch.nn.CrossEntropyLoss(reduction='sum')
 
 BATCH_SIZE = 16
-TRAIN_SIZE = 2000#len(train_data)#3600
+TRAIN_SIZE = 10000#len(train_data)#3600
 epoch = 1
 
 #Train
@@ -146,7 +165,7 @@ while epoch < 300:
 
 
         x = torch.tensor(x_list, dtype=torch.float)
-        x = x.view(BATCH_SIZE, 4, 4, -1)
+        x = x.view(BATCH_SIZE, s, -1, n)
         y = torch.tensor(y_list)
         sample_count += x.size()[0]
 
@@ -198,7 +217,7 @@ while epoch < 300:
     for x, y in validation_data:
 
         x = torch.tensor(x, dtype=torch.float)
-        x = x.view(1, 4, 4, -1)
+        x = x.view(1, s, -1, n)
         y = torch.tensor([y])
         sample_count += x.size()[0]
 
@@ -211,37 +230,11 @@ while epoch < 300:
 
         print("\n", predicted, y, "\n")
 
-    #     wrong = [(predicted[i], i) for i in range(len(predicted)) if predicted[i] != y[i]]
-    #     tree_0 = [tree for tree, i in wrong if y[i] == 0]
-    #     tree_1 = [tree for tree, i in wrong if y[i] == 1]
-    #     tree_2 = [tree for tree, i in wrong if y[i] == 2]
-    #
-    #     tree_0_len += len(tree_0)
-    #     tree_1_len += len(tree_1)
-    #     tree_2_len += len(tree_2)
-    #
-    #     guess_0 += len([i for i in predicted if i == 0])
-    #     guess_1 += len([i for i in predicted if i == 1])
-    #     guess_2 += len([i for i in predicted if i == 2])
-    #
-    #     real_0 += len([i for i in y if i == 0])
-    #     real_1 += len([i for i in y if i == 1])
-    #     real_2 += len([i for i in y if i == 2])
-
 
     score /= sample_count
     accuracy = correct / sample_count
 
     print("\n", "Val Acc: ", accuracy, "Val Score: ", score)
-
-    # vis.bar(
-    #     X = [tree_0_len, tree_1_len, tree_2_len, guess_0, guess_1, guess_2,
-    #          real_0, real_1, real_2],
-    #     opts= dict(title= f"Prediction Fails {epoch}",
-    #            rownames=["tree_0", "tree_1", "tree_2", "guess_0", "guess_1", "guess_2",
-    #                      "real_0", "real_1", "real_2"]),
-    #            win= f"bar3{epoch}"
-    # )
 
     vis.line(
         X = [epoch],
@@ -259,7 +252,7 @@ while epoch < 300:
         )
 
     #save MODEL
-    save_path = f"/Users/rhuck/Downloads/DL_Phylo/Recombination/models/{data_test}_{model_number}." + str(epoch)
+    save_path = f"/Users/rhuck/Downloads/DL_Phylo/Recombination/recombination_networks/models/{data_test}_{model_number}." + str(epoch)
     torch.save(model.state_dict(), save_path)
 
     epoch += 1
