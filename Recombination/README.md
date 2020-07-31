@@ -3,7 +3,7 @@
 Recombination Data Generation:
 
   1. Change recombination parameters in Recombination/data_generation/ctrlGenPar.py
-    ~Recombination/data_generation/MSTreeTopologyCommands.txt can help you choose the correct MS Command for the tree topology that you want
+    ~ Recombination/data_generation/MSTreeTopologyCommands.txt can help you choose the correct MS Command for the tree topology that you want
 
   2. Change data generation parameters in Recombination/data_generation/main.py
 
