@@ -17,4 +17,5 @@ Choose the generator from below:
 
 
 *You can ignore the permute_test directory as the scripts in it are no longer used (feel free to delete this directory)
+
 *The tree_types folder holds the newick trees to generate the data and is used in generation scripts above
