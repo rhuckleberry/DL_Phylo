@@ -16,8 +16,26 @@ Recombination Data Generation:
   5. If there are no lost datapoints, delete that file from Recombination/data_generation/recombination_data
   6. Move output datasets to Recombination/data_generation/test/data
 
-Recombination Data Network/Testing
+Recombination Data Network/Testing:
 
   a) Residual Neural Network
+    1. In Recombination/recombination_networks/recombination_ResNet.py, change the following parameters:
+
+      a) graph_title
+
+      b) graph_win
+
+      c) data_test
+
+      d) model_number
+
+    2. Run "visdom" in terminal
+
+    3. Type in visdom url into a browser
+
+    4. Run Recombination/recombination_networks/recombination_ResNet.py
 
   b) IQTREE ML Test
+
+    1. In ML_data_test/ML_tuple.py, change the parameter tuple_data_path to the path of your dev set
+    2. Run ML_data_test/ML_tuple.py and the IQTREE ML accuracy will be printed in the terminal
