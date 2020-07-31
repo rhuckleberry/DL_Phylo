@@ -38,5 +38,5 @@ Recombination Data Network/Testing:
 
   b) IQTREE ML Test
 
-    1. In ML_data_test/ML_tuple.py, change the parameter tuple_data_path to the path of your dev set
-    2. Run ML_data_test/ML_tuple.py and the IQTREE ML accuracy will be printed in the terminal
+    1. In IQTREE_ML/ML_labeledData.py, change the parameter data_path to the path of your dev set
+    2. Run IQTREE_ML/ML_labeledData.py and the IQTREE ML accuracy will be printed in the terminal
