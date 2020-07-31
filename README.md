@@ -19,6 +19,8 @@ Set-Up:
     
     c) Recombination/data_generation/test_data
     
+    d) Recombination/recombination_networks/models
+    
 Data Generation: 
 
 ~Change the parameters at the top of the script to generate the data you wish to specify
