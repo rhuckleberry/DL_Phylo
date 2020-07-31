@@ -2,7 +2,7 @@
 Deep Learning for Phylogenetic Inference
 
 Set-Up:
-1. Add the directory Evolution_Model_Classification/ResNet_data
+1. Add the directory Evolution_Model_Classification/data_generation/ResNet_data
 2. Add the directories: (seq-gen)
 
     a)  Seq-gen/data/train
