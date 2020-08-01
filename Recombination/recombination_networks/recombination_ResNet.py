@@ -23,6 +23,8 @@ import torch.nn
 import torch.optim
 import torch.utils.data
 
+import datetime
+
 graph_title = "ResNet Recombination Model test1_fact5_sl10000"
 graph_win = "test1_fact5_sl10000" #"recomb2"
 data_test = "test1_fact5_sl10000"
@@ -128,6 +130,8 @@ while epoch < 300:
     #TRAIN
     model.train()
 
+    train_start_time = datetime.datetime.now()
+
     #randomly sample TRAIN_SIZE number of datapoints
     epoch_train = random.sample(train_data, TRAIN_SIZE)
     sample_count, correct, score = 0, 0, 0.0
@@ -165,7 +169,10 @@ while epoch < 300:
     score /= sample_count
     accuracy = correct / sample_count
 
-    print("\n\n", "Epoch: \n", epoch, "Train Acc: ", accuracy, "Train Score: ", score)
+    train_execution_time = datetime.datetime.now() - epoch_start_time
+
+    print("\n\n", "Epoch: \n", epoch, "Train Acc: ", accuracy, "Train Score: ", score,
+          "Training Execution Time: ", train_execution_time)
 
     vis.line(
         X = [epoch],
@@ -188,6 +195,9 @@ while epoch < 300:
     ##VALIDATE
     optimizer.zero_grad()
     model.train(False)
+
+    dev_start_time = datetime.datetime.now()
+
     sample_count, correct, score = 0, 0, 0.0
 
     tree_0_len, tree_1_len, tree_2_len = 0, 0, 0
@@ -211,37 +221,12 @@ while epoch < 300:
 
         print("\n", predicted, y, "\n")
 
-    #     wrong = [(predicted[i], i) for i in range(len(predicted)) if predicted[i] != y[i]]
-    #     tree_0 = [tree for tree, i in wrong if y[i] == 0]
-    #     tree_1 = [tree for tree, i in wrong if y[i] == 1]
-    #     tree_2 = [tree for tree, i in wrong if y[i] == 2]
-    #
-    #     tree_0_len += len(tree_0)
-    #     tree_1_len += len(tree_1)
-    #     tree_2_len += len(tree_2)
-    #
-    #     guess_0 += len([i for i in predicted if i == 0])
-    #     guess_1 += len([i for i in predicted if i == 1])
-    #     guess_2 += len([i for i in predicted if i == 2])
-    #
-    #     real_0 += len([i for i in y if i == 0])
-    #     real_1 += len([i for i in y if i == 1])
-    #     real_2 += len([i for i in y if i == 2])
-
-
     score /= sample_count
     accuracy = correct / sample_count
 
-    print("\n", "Val Acc: ", accuracy, "Val Score: ", score)
+    dev_execution_time = datetime.datetime.now() - dev_start_time
 
-    # vis.bar(
-    #     X = [tree_0_len, tree_1_len, tree_2_len, guess_0, guess_1, guess_2,
-    #          real_0, real_1, real_2],
-    #     opts= dict(title= f"Prediction Fails {epoch}",
-    #            rownames=["tree_0", "tree_1", "tree_2", "guess_0", "guess_1", "guess_2",
-    #                      "real_0", "real_1", "real_2"]),
-    #            win= f"bar3{epoch}"
-    # )
+    print("\n", "Val Acc: ", accuracy, "Val Score: ", score, "Dev Execution Time: ", dev_execution_time)
 
     vis.line(
         X = [epoch],
