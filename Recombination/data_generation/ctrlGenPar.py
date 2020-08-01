@@ -112,13 +112,11 @@ def condenseGT(trial):
 def generateINDELibleCtrl(speciesTree, trial, fileDirectory, zeroRecomb, seqLen):
     """
     Generate an INDELible control file for the input trial at the input file directory
-
     :param speciesTree: Name of species tree
     :param trial: List of rows in each trial of ms. Each row corresponds to a segment.
     :param fileDirectory: Name of control file to generate
     :param zeroRecomb: flag indicating whether there is no recombination
     :param seqLen: total length of sequence
-
     """
     if (zeroRecomb):
         condensedSegments = [(seqLen, trial[0])]

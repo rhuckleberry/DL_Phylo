@@ -35,6 +35,10 @@ Data Generation:
 
     a) Evolution_Model_Classification/model_data_generator.py
 
+3. Recombination Data
+
+    a) Recombination/data_generation/main.py
+
 Data Set Merging:
 
 ~Use this to merge datasets that you have already generated to save time
@@ -57,6 +61,12 @@ Run Models:
 
         i) Evolution_Model_Classification/test_network.py -- Inception Network
         ii) Evolution_Model_Classification/evomodel_ResNet.py -- ResNet
+
+    d) Recombination Data Classification (currently same as DL models #1)
+
+        i) Recombination/recombination_networks/recombination_ResNet.py
+        ii) Recombination/recombination_networks/test_network.py
+
 
 *Files/functions about "permuting" or "transforming" can be largely ignored. They are vestiges of our old data generation/augementation. I leave the scripts here for now in case they later prove useful
 
